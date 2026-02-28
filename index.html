@@ -7,7 +7,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { 
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
     
     .parking-bg {
       background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), 
@@ -60,6 +64,8 @@
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      font-weight: 600;
+      font-size: 14px;
     }
     
     .slot-card:hover {
@@ -98,6 +104,59 @@
     .booking-modal.active {
       display: flex;
     }
+    
+    .timer-display {
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      font-weight: bold;
+      color: #dc2626;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 2px solid #ef4444;
+    }
+    
+    .payment-option {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .payment-option:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    
+    .payment-option.selected {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .feature-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+    
+    .stats-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    
+    .stats-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
   </style>
 </head>
 
@@ -105,14 +164,54 @@
 <div class="min-h-screen p-6">
   <!-- Header -->
   <div class="flex justify-between items-center mb-8">
-    <h1 class="text-4xl font-bold text-white drop-shadow-lg">Smart Parking Dashboard</h1>
+    <h1 class="text-5xl font-bold text-white drop-shadow-lg">Smart Parking Dashboard</h1>
     <div class="flex items-center gap-4">
-      <div class="glass-card px-4 py-2 rounded-xl text-gray-800">
+      <div class="glass-card px-6 py-3 rounded-xl text-gray-800 font-semibold">
         <span id="userDisplay">Guest User</span>
       </div>
-      <button onclick="logout()" class="bg-red-500/80 hover:bg-red-600/80 text-white px-4 py-2 rounded-xl transition">
+      <button onclick="logout()" class="bg-red-500/80 hover:bg-red-600/80 text-white px-6 py-3 rounded-xl transition font-semibold">
         Logout
       </button>
+    </div>
+  </div>
+
+  <!-- Additional Features -->
+  <div class="grid grid-cols-4 gap-4 mb-8">
+    <div class="feature-card text-white">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-clock text-2xl text-blue-300"></i>
+        <div>
+          <p class="text-sm opacity-80">Current Time</p>
+          <p class="font-semibold text-lg" id="currentTime">--:--</p>
+        </div>
+      </div>
+    </div>
+    <div class="feature-card text-white">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-calendar text-2xl text-green-300"></i>
+        <div>
+          <p class="text-sm opacity-80">Today</p>
+          <p class="font-semibold text-lg" id="currentDate">--</p>
+        </div>
+      </div>
+    </div>
+    <div class="feature-card text-white">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-coins text-2xl text-yellow-300"></i>
+        <div>
+          <p class="text-sm opacity-80">Today's Revenue</p>
+          <p class="font-semibold text-lg">₹1,250</p>
+        </div>
+      </div>
+    </div>
+    <div class="feature-card text-white">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-chart-line text-2xl text-purple-300"></i>
+        <div>
+          <p class="text-sm opacity-80">Occupancy Rate</p>
+          <p class="font-semibold text-lg">37.5%</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -177,17 +276,17 @@
         
         <!-- Quick Stats -->
         <div class="grid grid-cols-3 gap-4">
-          <div class="bg-green-100 p-4 rounded-xl text-center">
-            <p class="text-2xl font-bold text-green-700">5</p>
-            <p class="text-sm text-green-600">Available</p>
+          <div class="bg-green-100 p-6 rounded-xl text-center">
+            <p class="stats-number text-green-700">5</p>
+            <p class="stats-label text-green-600">Available</p>
           </div>
-          <div class="bg-red-100 p-4 rounded-xl text-center">
-            <p class="text-2xl font-bold text-red-700">2</p>
-            <p class="text-sm text-red-600">Occupied</p>
+          <div class="bg-red-100 p-6 rounded-xl text-center">
+            <p class="stats-number text-red-700">2</p>
+            <p class="stats-label text-red-600">Occupied</p>
           </div>
-          <div class="bg-yellow-100 p-4 rounded-xl text-center">
-            <p class="text-2xl font-bold text-yellow-700">1</p>
-            <p class="text-sm text-yellow-600">Reserved</p>
+          <div class="bg-yellow-100 p-6 rounded-xl text-center">
+            <p class="stats-number text-yellow-700">1</p>
+            <p class="stats-label text-yellow-600">Reserved</p>
           </div>
         </div>
       </div>
@@ -234,18 +333,18 @@
 
 <!-- Booking Modal -->
 <div id="bookingModal" class="booking-modal">
-  <div class="glass-card rounded-3xl p-8 max-w-md w-full mx-4">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6">Book Parking Slot</h3>
+  <div class="glass-card rounded-3xl p-8 max-w-lg w-full mx-4">
+    <h3 class="text-3xl font-bold text-gray-800 mb-6">Book Parking Slot</h3>
     
-    <form id="bookingForm" class="space-y-4">
+    <form id="bookingForm" class="space-y-5">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Slot Number</label>
-        <input type="text" id="slotNumber" readonly class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-xl">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Slot Number</label>
+        <input type="text" id="slotNumber" readonly class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl font-semibold">
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
-        <select id="duration" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-xl">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Duration</label>
+        <select id="duration" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl">
           <option value="1">1 hour - ₹50</option>
           <option value="2">2 hours - ₹100</option>
           <option value="3">3 hours - ₹150</option>
@@ -255,16 +354,47 @@
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Number</label>
-        <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-xl">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Vehicle Number</label>
+        <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl">
+      </div>
+      
+      <!-- Payment Gateway Options -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-3">Payment Method</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="payment-option bg-white border-2 border-gray-300 rounded-xl p-3" onclick="selectPayment('card')">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-credit-card text-blue-500"></i>
+              <span class="font-medium">Credit Card</span>
+            </div>
+          </div>
+          <div class="payment-option bg-white border-2 border-gray-300 rounded-xl p-3" onclick="selectPayment('upi')">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-mobile-alt text-green-500"></i>
+              <span class="font-medium">UPI</span>
+            </div>
+          </div>
+          <div class="payment-option bg-white border-2 border-gray-300 rounded-xl p-3" onclick="selectPayment('wallet')">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-wallet text-purple-500"></i>
+              <span class="font-medium">Wallet</span>
+            </div>
+          </div>
+          <div class="payment-option bg-white border-2 border-gray-300 rounded-xl p-3" onclick="selectPayment('cash')">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-money-bill text-yellow-500"></i>
+              <span class="font-medium">Cash</span>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div class="flex gap-4">
-        <button type="button" onclick="closeBookingModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition">
+        <button type="button" onclick="closeBookingModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-xl hover:bg-gray-400 transition font-semibold">
           Cancel
         </button>
-        <button type="submit" class="flex-1 bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition">
-          Confirm Booking
+        <button type="submit" class="flex-1 bg-blue-500 text-white py-3 rounded-xl hover:bg-blue-600 transition font-semibold">
+          Proceed to Payment
         </button>
       </div>
     </form>
@@ -286,6 +416,78 @@
   
   let currentUser = null;
   let activeBooking = null;
+  let selectedPaymentMethod = null;
+  let reservationTimers = {};
+  
+  // Update current time and date
+  function updateDateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+    const dateString = now.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    
+    document.getElementById('currentTime').textContent = timeString;
+    document.getElementById('currentDate').textContent = dateString;
+  }
+  
+  // Start timer for reservation
+  function startReservationTimer(slotId, duration) {
+    const endTime = new Date().getTime() + (duration * 60 * 60 * 1000);
+    
+    reservationTimers[slotId] = setInterval(() => {
+      const now = new Date().getTime();
+      const timeLeft = endTime - now;
+      
+      if (timeLeft <= 0) {
+        clearInterval(reservationTimers[slotId]);
+        releaseSlot(slotId);
+        showNotification(`Reservation for ${slotId} has expired!`, 'error');
+        return;
+      }
+      
+      const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      
+      // Update timer display if this slot is active booking
+      const activeBookingEl = document.getElementById('activeBooking');
+      const timerEl = document.getElementById(`timer-${slotId}`);
+      if (timerEl) {
+        timerEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
+      }
+    }, 1000);
+  }
+  
+  // Payment gateway selection
+  function selectPayment(method) {
+    selectedPaymentMethod = method;
+    
+    // Remove selected class from all options
+    document.querySelectorAll('.payment-option').forEach(option => {
+      option.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    event.currentTarget.classList.add('selected');
+  }
+  
+  // Process payment
+  function processPayment(amount, method) {
+    return new Promise((resolve) => {
+      // Simulate payment processing
+      setTimeout(() => {
+        showNotification(`Payment of ₹${amount} processed via ${method.toUpperCase()}!`, 'success');
+        resolve(true);
+      }, 2000);
+    });
+  }
   
   // Check user session
   window.addEventListener('load', function() {
@@ -294,6 +496,8 @@
       currentUser = JSON.parse(userData);
       document.getElementById('userDisplay').textContent = currentUser.username;
       updateActiveBooking();
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
     } else {
       window.location.href = 'login.html';
     }
@@ -326,32 +530,54 @@
   function closeBookingModal() {
     document.getElementById('bookingModal').classList.remove('active');
     document.getElementById('bookingForm').reset();
+    selectedPaymentMethod = null;
+    
+    // Remove selected class from all payment options
+    document.querySelectorAll('.payment-option').forEach(option => {
+      option.classList.remove('selected');
+    });
   }
   
   // Handle booking form submission
-  document.getElementById('bookingForm').addEventListener('submit', function(e) {
+  document.getElementById('bookingForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    if (!selectedPaymentMethod) {
+      showNotification('Please select a payment method', 'error');
+      return;
+    }
     
     const slotId = document.getElementById('slotNumber').value;
     const duration = parseInt(document.getElementById('duration').value);
     const vehicleNumber = document.getElementById('vehicleNumber').value;
+    const amount = duration * 50;
     
-    // Book the slot
-    parkingSlots[slotId] = {
-      status: 'occupied',
-      bookedBy: currentUser.username,
-      duration: duration,
-      vehicleNumber: vehicleNumber,
-      bookingTime: new Date().toISOString()
-    };
+    // Process payment first
+    const paymentSuccess = await processPayment(amount, selectedPaymentMethod);
     
-    // Update UI
-    updateSlotUI(slotId);
-    updateActiveBooking();
-    closeBookingModal();
-    
-    // Show success message
-    showNotification(`Slot ${slotId} booked successfully!`, 'success');
+    if (paymentSuccess) {
+      // Book the slot
+      parkingSlots[slotId] = {
+        status: 'occupied',
+        bookedBy: currentUser.username,
+        duration: duration,
+        vehicleNumber: vehicleNumber,
+        bookingTime: new Date().toISOString(),
+        paymentMethod: selectedPaymentMethod,
+        amount: amount
+      };
+      
+      // Start reservation timer
+      startReservationTimer(slotId, duration);
+      
+      // Update UI
+      updateSlotUI(slotId);
+      updateActiveBooking();
+      closeBookingModal();
+      
+      // Show success message
+      showNotification(`Slot ${slotId} booked successfully! Timer started.`, 'success');
+    }
   });
   
   // Update slot UI
@@ -385,16 +611,26 @@
             <span class="font-semibold text-green-700">Active Booking</span>
             <span class="text-sm text-green-600">${slotId}</span>
           </div>
-          <div class="text-sm text-gray-600">
+          <div class="text-sm text-gray-600 mb-3">
             <p>Vehicle: ${slot.vehicleNumber}</p>
             <p>Duration: ${slot.duration} hours</p>
+            <p>Payment: ${slot.paymentMethod?.toUpperCase() || 'N/A'}</p>
+            <p>Amount: ₹${slot.amount || 'N/A'}</p>
             <p>Time: ${new Date(slot.bookingTime).toLocaleTimeString()}</p>
           </div>
-          <button onclick="releaseSlot('${slotId}')" class="mt-2 bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition">
+          <div class="timer-display mb-3" id="timer-${slotId}">
+            Loading timer...
+          </div>
+          <button onclick="releaseSlot('${slotId}')" class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition">
             Release Slot
           </button>
         </div>
       `;
+      
+      // Start timer if not already running
+      if (!reservationTimers[slotId]) {
+        startReservationTimer(slotId, slot.duration);
+      }
     } else {
       activeBookingEl.innerHTML = `
         <div class="text-center text-gray-500 py-8">
@@ -407,12 +643,20 @@
   
   // Release slot
   function releaseSlot(slotId) {
+    // Clear timer if exists
+    if (reservationTimers[slotId]) {
+      clearInterval(reservationTimers[slotId]);
+      delete reservationTimers[slotId];
+    }
+    
     parkingSlots[slotId] = {
       status: 'available',
       bookedBy: null,
       duration: null,
       vehicleNumber: null,
-      bookingTime: null
+      bookingTime: null,
+      paymentMethod: null,
+      amount: null
     };
     
     const slotElement = document.querySelector(`[data-slot="${slotId}"]`);
