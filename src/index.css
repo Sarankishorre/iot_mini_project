@@ -5,27 +5,24 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
+html, body, #root {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .parking-bg {
   background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), 
-              url('../public/car-park-with-cars-background_1047188-62547.avif'),
+              url('/car-park-with-cars-background_1047188-62547.avif'),
               linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-size: cover, cover;
-  background-position: center, center;
-  background-attachment: fixed, fixed;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .glass-card {
@@ -48,16 +45,26 @@ body {
   justify-content: center;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  height: 140px;
-  width: 140px;
-  border-radius: 20px;
+  padding: 12px;
+  height: 100px;
+  min-width: 80px;
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
+}
+
+@media (min-width: 768px) {
+  .slot-card {
+    padding: 20px;
+    height: 140px;
+    min-width: 120px;
+    border-radius: 20px;
+    font-size: 14px;
+  }
 }
 
 .slot-card:hover {

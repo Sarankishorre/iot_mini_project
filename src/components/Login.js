@@ -12,10 +12,19 @@ const Login = ({ onLogin }) => {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
 
-  // Initialize database
+  // Initialize database with demo user
   const initDatabase = () => {
     if (!localStorage.getItem('parkingUsers')) {
-      localStorage.setItem('parkingUsers', JSON.stringify({}));
+      // Add demo user
+      const demoUsers = {
+        'demo': {
+          username: 'demo',
+          email: 'demo@example.com',
+          password: 'admin123',
+          createdAt: new Date().toISOString()
+        }
+      };
+      localStorage.setItem('parkingUsers', JSON.stringify(demoUsers));
     }
   };
 
@@ -46,15 +55,34 @@ const Login = ({ onLogin }) => {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     const users = getUsersFromDB();
-    if (users[loginData.username] && users[loginData.username].password === loginData.password) {
-      const sessionData = {
-        username: loginData.username,
-        email: users[loginData.username].email,
-        loginTime: new Date().toISOString()
-      };
-      onLogin(sessionData);
+    const username = loginData.username;
+    const password = loginData.password;
+    
+    // Check if user exists in database
+    if (users[username]) {
+      if (users[username].password === password) {
+        const sessionData = {
+          username: username,
+          email: users[username].email,
+          loginTime: new Date().toISOString()
+        };
+        onLogin(sessionData);
+      } else {
+        showMessage('Invalid password. Please try again.', 'error');
+      }
     } else {
-      showMessage('Invalid username or password', 'error');
+      // Demo login - any username with "admin123" password
+      if (password === 'admin123') {
+        const sessionData = {
+          username: username,
+          email: username + '@demo.com',
+          loginTime: new Date().toISOString(),
+          isDemo: true
+        };
+        onLogin(sessionData);
+      } else {
+        showMessage('User not found. Please sign up or use password "admin123" for demo.', 'error');
+      }
     }
     setLoading(false);
   };
@@ -87,7 +115,13 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+         style={{
+           background: "linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('/car-park-with-cars-background_1047188-62547.avif'), linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+           backgroundSize: 'cover, cover, cover',
+           backgroundPosition: 'center, center, center',
+           backgroundRepeat: 'no-repeat, no-repeat, no-repeat'
+         }}>
       <div className="w-full max-w-md">
         <div className={`relative transition-transform duration-700 transform ${isFlipped ? 'rotate-y-180' : ''}`} style={{ perspective: '1500px' }}>
           
