@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Parking Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-700 min-h-screen p-8">
+
+<div class="max-w-7xl mx-auto grid grid-cols-12 gap-8">
+
+  <!-- LEFT SIDE -->
+  <div class="col-span-8 space-y-8">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <h1 class="text-4xl font-bold text-white">Parking Dashboard</h1>
+      <div class="bg-white/20 backdrop-blur-lg px-4 py-2 rounded-xl text-white">
+        SSN Parking
+      </div>
+    </div>
+
+    <!-- Slot Grid -->
+    <div class="grid grid-cols-4 gap-6">
+
+      <div class="slot-card bg-green-400/20 border border-green-200 text-white">
+        <p class="text-lg font-semibold">Slot 01</p>
+        <p class="text-sm opacity-80">Available</p>
+      </div>
+
+      <div class="slot-card bg-red-400/20 border border-red-200 text-white">
+        <p class="text-lg font-semibold">Slot 02</p>
+        <p class="text-sm opacity-80">Booked</p>
+      </div>
+
+      <div class="slot-card bg-green-400/20 border border-green-200 text-white">
+        <p class="text-lg font-semibold">Slot 03</p>
+        <p class="text-sm opacity-80">Available</p>
+      </div>
+
+      <div class="slot-card bg-red-400/20 border border-red-200 text-white">
+        <p class="text-lg font-semibold">Slot 04</p>
+        <p class="text-sm opacity-80">Booked</p>
+      </div>
+
+    </div>
+
+    <!-- Active Reservation Card -->
+    <div class="bg-white/20 backdrop-blur-xl rounded-3xl p-8 text-white shadow-2xl flex justify-between items-center">
+
+      <div>
+        <p class="text-lg opacity-80">Parking Time</p>
+        <p class="text-3xl font-bold mt-2">30 min</p>
+      </div>
+
+      <div>
+        <p class="text-lg opacity-80">Charges</p>
+        <p class="text-3xl font-bold mt-2">₹100</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="col-span-4">
+
+    <div class="bg-white rounded-3xl p-8 shadow-2xl">
+
+      <h2 class="text-2xl font-semibold mb-6">Billing History</h2>
+
+      <div class="space-y-4">
+
+        <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl">
+          <div>
+            <p class="font-semibold">x</p>
+            <p class="text-sm text-gray-500">30 mins</p>
+          </div>
+          <p class="font-bold">₹100</p>
+        </div>
+
+        <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl">
+          <div>
+            <p class="font-semibold">y</p>
+            <p class="text-sm text-gray-500">2 hours</p>
+          </div>
+          <p class="font-bold">₹400</p>
+        </div>
+
+        <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl">
+          <div>
+            <p class="font-semibold">z</p>
+            <p class="text-sm text-gray-500">1.5 hours</p>
+          </div>
+          <p class="font-bold">₹300</p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+.slot-card {
+  padding: 25px;
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.slot-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+}
+</style>
+
+</body>
+</html>
