@@ -5,128 +5,443 @@
   <title>Smart Parking Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { font-family: 'Inter', sans-serif; }
+    
+    .parking-bg {
+      background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), 
+                  url('car-park-with-cars-background_1047188-62547.avif'),
+                  linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-size: cover, cover;
+      background-position: center, center;
+      background-attachment: fixed, fixed;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
+    
+    body { 
+      font-family: 'Inter', sans-serif; 
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 193, 7, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    }
+    
+    .text-shadow {
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+    .text-shadow-light {
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .slot-card {
+      align-items: center; 
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      height: 140px;
+      width: 140px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .slot-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+    
+    .slot-available {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+    
+    .slot-occupied {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+    
+    .slot-reserved {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+    }
+    
+    .booking-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .booking-modal.active {
+      display: flex;
+    }
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-700 min-h-screen p-8">
-
-<div class="max-w-7xl mx-auto grid grid-cols-12 gap-8">
-
-  <!-- LEFT SIDE -->
-  <div class="col-span-8 space-y-8">
-
-    <!-- Header -->
-    <div class="flex justify-between items-center">
-      <h1 class="text-4xl font-bold text-white">Parking Dashboard</h1>
-      <div class="bg-white/20 backdrop-blur-lg px-4 py-2 rounded-xl text-white">
-        SSN Parking
+<body class="parking-bg">
+<div class="min-h-screen p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-bold text-white drop-shadow-lg">Smart Parking Dashboard</h1>
+    <div class="flex items-center gap-4">
+      <div class="glass-card px-4 py-2 rounded-xl text-gray-800">
+        <span id="userDisplay">Guest User</span>
       </div>
+      <button onclick="logout()" class="bg-red-500/80 hover:bg-red-600/80 text-white px-4 py-2 rounded-xl transition">
+        Logout
+      </button>
     </div>
-
-    <!-- Slot Grid -->
-    <div class="grid grid-cols-4 gap-6">
-
-      <div class="slot-card bg-green-400/20 border border-green-200 text-white">
-        <p class="text-lg font-semibold">Slot 01</p>
-        <p class="text-sm opacity-80">Available</p>
-      </div>
-
-      <div class="slot-card bg-red-400/20 border border-red-200 text-white">
-        <p class="text-lg font-semibold">Slot 02</p>
-        <p class="text-sm opacity-80">Booked</p>
-      </div>
-
-      <div class="slot-card bg-green-400/20 border border-green-200 text-white">
-        <p class="text-lg font-semibold">Slot 03</p>
-        <p class="text-sm opacity-80">Available</p>
-      </div>
-
-      <div class="slot-card bg-red-400/20 border border-red-200 text-white">
-        <p class="text-lg font-semibold">Slot 04</p>
-        <p class="text-sm opacity-80">Booked</p>
-      </div>
-
-    </div>
-
-    <!-- Active Reservation Card -->
-    <div class="bg-white/20 backdrop-blur-xl rounded-3xl p-8 text-white shadow-2xl flex justify-between items-center">
-
-      <div>
-        <p class="text-lg opacity-80">Parking Time</p>
-        <p class="text-3xl font-bold mt-2">30 min</p>
-      </div>
-
-      <div>
-        <p class="text-lg opacity-80">Charges</p>
-        <p class="text-3xl font-bold mt-2">₹100</p>
-      </div>
-
-    </div>
-
   </div>
 
-  <!-- RIGHT SIDE -->
-  <div class="col-span-4">
-
-    <div class="bg-white rounded-3xl p-8 shadow-2xl">
-
-      <h2 class="text-2xl font-semibold mb-6">Billing History</h2>
-
-      <div class="space-y-4">
-
-        <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl">
-          <div>
-            <p class="font-semibold">x</p>
-            <p class="text-sm text-gray-500">30 mins</p>
+  <!-- Main Content -->
+  <div class="grid grid-cols-12 gap-6">
+    
+    <!-- Left Side - Parking Slots -->
+    <div class="col-span-8">
+      <div class="glass-card rounded-3xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Parking Slots</h2>
+        
+        <!-- Slot Grid -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div class="slot-card slot-available" onclick="bookSlot('A1')" data-slot="A1">
+            <i class="fas fa-car text-3xl mb-2"></i>
+            <p class="font-semibold">A1</p>
+            <p class="text-sm opacity-80">Available</p>
           </div>
-          <p class="font-bold">₹100</p>
-        </div>
-
-        <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl">
-          <div>
-            <p class="font-semibold">y</p>
-            <p class="text-sm text-gray-500">2 hours</p>
+          
+          <div class="slot-card slot-occupied" data-slot="A2">
+            <i class="fas fa-car text-3xl mb-2"></i>
+            <p class="font-semibold">A2</p>
+            <p class="text-sm opacity-80">Occupied</p>
           </div>
-          <p class="font-bold">₹400</p>
-        </div>
-
-        <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl">
-          <div>
-            <p class="font-semibold">z</p>
-            <p class="text-sm text-gray-500">1.5 hours</p>
+          
+          <div class="slot-card slot-available" onclick="bookSlot('A3')" data-slot="A3">
+            <i class="fas fa-car text-3xl mb-2"></i>
+            <p class="font-semibold">A3</p>
+            <p class="text-sm opacity-80">Available</p>
           </div>
-          <p class="font-bold">₹300</p>
+          
+          <div class="slot-card slot-reserved" data-slot="A4">
+            <i class="fas fa-car text-3xl mb-2"></i>
+            <p class="font-semibold">A4</p>
+            <p class="text-sm opacity-80">Reserved</p>
+          </div>
+          
+          <div class="slot-card slot-available" onclick="bookSlot('B1')" data-slot="B1">
+            <i class="fas fa-car text-3xl mb-2"></i>
+            <p class="font-semibold">B1</p>
+            <p class="text-sm opacity-80">Available</p>
+          </div>
+          
+          <div class="slot-card slot-available" onclick="bookSlot('B2')" data-slot="B2">
+            <i class="fas fa-car text-3xl mb-2"></i>
+            <p class="font-semibold">B2</p>
+            <p class="text-sm opacity-80">Available</p>
+          </div>
+          
+          <div class="slot-card slot-occupied" data-slot="B3">
+            <i class="fas fa-car text-3xl mb-2"></i>
+            <p class="font-semibold">B3</p>
+            <p class="text-sm opacity-80">Occupied</p>
+          </div>
+          
+          <div class="slot-card slot-available" onclick="bookSlot('B4')" data-slot="B4">
+            <i class="fas fa-car text-3xl mb-2"></i>
+            <p class="font-semibold">B4</p>
+            <p class="text-sm opacity-80">Available</p>
+          </div>
         </div>
-
+        
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-green-100 p-4 rounded-xl text-center">
+            <p class="text-2xl font-bold text-green-700">5</p>
+            <p class="text-sm text-green-600">Available</p>
+          </div>
+          <div class="bg-red-100 p-4 rounded-xl text-center">
+            <p class="text-2xl font-bold text-red-700">2</p>
+            <p class="text-sm text-red-600">Occupied</p>
+          </div>
+          <div class="bg-yellow-100 p-4 rounded-xl text-center">
+            <p class="text-2xl font-bold text-yellow-700">1</p>
+            <p class="text-sm text-yellow-600">Reserved</p>
+          </div>
+        </div>
       </div>
-
     </div>
-
+    
+    <!-- Right Side - Booking Info -->
+    <div class="col-span-4">
+      <div class="glass-card rounded-3xl p-6 mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Active Booking</h2>
+        <div id="activeBooking" class="space-y-4">
+          <div class="text-center text-gray-500 py-8">
+            <i class="fas fa-parking text-4xl mb-2"></i>
+            <p>No active booking</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="glass-card rounded-3xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Recent Bookings</h2>
+        <div id="recentBookings" class="space-y-3">
+          <div class="bg-gray-100 p-3 rounded-xl">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="font-semibold">A1</p>
+                <p class="text-sm text-gray-500">2 hours ago</p>
+              </div>
+              <p class="font-bold text-green-600">₹100</p>
+            </div>
+          </div>
+          <div class="bg-gray-100 p-3 rounded-xl">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="font-semibold">B2</p>
+                <p class="text-sm text-gray-500">5 hours ago</p>
+              </div>
+              <p class="font-bold text-green-600">₹150</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-
 </div>
 
-<style>
-.slot-card {
-  align-items: center; 
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
-  padding: 25px;
-  height: 180px;
-  width: 180px;
-  border-radius: 30px;
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.slot-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 30px rgba(0,0,0,0.2);
-}
-</style>
+<!-- Booking Modal -->
+<div id="bookingModal" class="booking-modal">
+  <div class="glass-card rounded-3xl p-8 max-w-md w-full mx-4">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6">Book Parking Slot</h3>
+    
+    <form id="bookingForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Slot Number</label>
+        <input type="text" id="slotNumber" readonly class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-xl">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+        <select id="duration" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-xl">
+          <option value="1">1 hour - ₹50</option>
+          <option value="2">2 hours - ₹100</option>
+          <option value="3">3 hours - ₹150</option>
+          <option value="4">4 hours - ₹200</option>
+          <option value="8">8 hours - ₹400</option>
+        </select>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Number</label>
+        <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-xl">
+      </div>
+      
+      <div class="flex gap-4">
+        <button type="button" onclick="closeBookingModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition">
+          Cancel
+        </button>
+        <button type="submit" class="flex-1 bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition">
+          Confirm Booking
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Parking slots data
+  let parkingSlots = {
+    'A1': { status: 'available', bookedBy: null, duration: null },
+    'A2': { status: 'occupied', bookedBy: 'demo_user', duration: 2 },
+    'A3': { status: 'available', bookedBy: null, duration: null },
+    'A4': { status: 'reserved', bookedBy: 'demo_user', duration: 3 },
+    'B1': { status: 'available', bookedBy: null, duration: null },
+    'B2': { status: 'available', bookedBy: null, duration: null },
+    'B3': { status: 'occupied', bookedBy: 'demo_user', duration: 1 },
+    'B4': { status: 'available', bookedBy: null, duration: null }
+  };
+  
+  let currentUser = null;
+  let activeBooking = null;
+  
+  // Check user session
+  window.addEventListener('load', function() {
+    const userData = localStorage.getItem('currentUser');
+    if (userData) {
+      currentUser = JSON.parse(userData);
+      document.getElementById('userDisplay').textContent = currentUser.username;
+      updateActiveBooking();
+    } else {
+      window.location.href = 'login.html';
+    }
+  });
+  
+  // Logout function
+  function logout() {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+  }
+  
+  // Book slot
+  function bookSlot(slotId) {
+    if (!currentUser) {
+      alert('Please login to book a slot');
+      return;
+    }
+    
+    const slot = parkingSlots[slotId];
+    if (slot.status !== 'available') {
+      alert('This slot is not available');
+      return;
+    }
+    
+    document.getElementById('slotNumber').value = slotId;
+    document.getElementById('bookingModal').classList.add('active');
+  }
+  
+  // Close booking modal
+  function closeBookingModal() {
+    document.getElementById('bookingModal').classList.remove('active');
+    document.getElementById('bookingForm').reset();
+  }
+  
+  // Handle booking form submission
+  document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const slotId = document.getElementById('slotNumber').value;
+    const duration = parseInt(document.getElementById('duration').value);
+    const vehicleNumber = document.getElementById('vehicleNumber').value;
+    
+    // Book the slot
+    parkingSlots[slotId] = {
+      status: 'occupied',
+      bookedBy: currentUser.username,
+      duration: duration,
+      vehicleNumber: vehicleNumber,
+      bookingTime: new Date().toISOString()
+    };
+    
+    // Update UI
+    updateSlotUI(slotId);
+    updateActiveBooking();
+    closeBookingModal();
+    
+    // Show success message
+    showNotification(`Slot ${slotId} booked successfully!`, 'success');
+  });
+  
+  // Update slot UI
+  function updateSlotUI(slotId) {
+    const slotElement = document.querySelector(`[data-slot="${slotId}"]`);
+    const slot = parkingSlots[slotId];
+    
+    slotElement.className = `slot-card slot-${slot.status}`;
+    if (slot.status === 'occupied') {
+      slotElement.onclick = null;
+      slotElement.innerHTML = `
+        <i class="fas fa-car text-3xl mb-2"></i>
+        <p class="font-semibold">${slotId}</p>
+        <p class="text-sm opacity-80">Occupied</p>
+      `;
+    }
+  }
+  
+  // Update active booking
+  function updateActiveBooking() {
+    const activeBookingEl = document.getElementById('activeBooking');
+    const userBookings = Object.entries(parkingSlots).filter(([id, slot]) => 
+      slot.bookedBy === currentUser.username && slot.status === 'occupied'
+    );
+    
+    if (userBookings.length > 0) {
+      const [slotId, slot] = userBookings[0];
+      activeBookingEl.innerHTML = `
+        <div class="bg-green-100 p-4 rounded-xl">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-semibold text-green-700">Active Booking</span>
+            <span class="text-sm text-green-600">${slotId}</span>
+          </div>
+          <div class="text-sm text-gray-600">
+            <p>Vehicle: ${slot.vehicleNumber}</p>
+            <p>Duration: ${slot.duration} hours</p>
+            <p>Time: ${new Date(slot.bookingTime).toLocaleTimeString()}</p>
+          </div>
+          <button onclick="releaseSlot('${slotId}')" class="mt-2 bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition">
+            Release Slot
+          </button>
+        </div>
+      `;
+    } else {
+      activeBookingEl.innerHTML = `
+        <div class="text-center text-gray-500 py-8">
+          <i class="fas fa-parking text-4xl mb-2"></i>
+          <p>No active booking</p>
+        </div>
+      `;
+    }
+  }
+  
+  // Release slot
+  function releaseSlot(slotId) {
+    parkingSlots[slotId] = {
+      status: 'available',
+      bookedBy: null,
+      duration: null,
+      vehicleNumber: null,
+      bookingTime: null
+    };
+    
+    const slotElement = document.querySelector(`[data-slot="${slotId}"]`);
+    slotElement.className = 'slot-card slot-available';
+    slotElement.onclick = () => bookSlot(slotId);
+    slotElement.innerHTML = `
+      <i class="fas fa-car text-3xl mb-2"></i>
+      <p class="font-semibold">${slotId}</p>
+      <p class="text-sm opacity-80">Available</p>
+    `;
+    
+    updateActiveBooking();
+    showNotification(`Slot ${slotId} released successfully!`, 'success');
+  }
+  
+  // Show notification
+  function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-xl text-white z-50 ${
+      type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+</script>
 
 </body>
 </html>

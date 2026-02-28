@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Smart Parking</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    
+    /* Local Car Parking Background */
+    .parking-bg {
+      background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), 
+                  url('car-park-with-cars-background_1047188-62547.avif'),
+                  linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-size: cover, cover;
+      background-position: center, center;
+      background-attachment: fixed, fixed;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
+    
+    body { 
+      font-family: 'Inter', sans-serif; 
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+    }
+    
+    /* Glass Morphism Card - Adapted for Cartoon Background */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 193, 7, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 193, 7, 0.05), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 4s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
+    /* Input Animations - Adapted for Light Theme */
+    .input-group {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .input-group::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .input-group:focus-within::before {
+      left: 100%;
+    }
+    
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+      transform: translateY(-25px) scale(0.85);
+      color: #2563eb;
+      text-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+    }
+    
+    .floating-label {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      color: #6b7280;
+    }
+    
+    /* Button Animations - Adapted for Light Theme */
+    .btn-animated {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    
+    .btn-animated::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.6s ease;
+    }
+    
+    .btn-animated:hover::before {
+      left: 100%;
+    }
+    
+    .btn-animated:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .btn-animated:active {
+      transform: translateY(0) scale(0.98);
+    }
+    
+    /* Pulse Animation - Adapted for Light Theme */
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { 
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7),
+                   0 0 20px rgba(37, 99, 235, 0.3);
+      }
+      70% { 
+        box-shadow: 0 0 0 15px rgba(37, 99, 235, 0),
+                   0 0 30px rgba(37, 99, 235, 0);
+      }
+      100% { 
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0),
+                   0 0 20px rgba(37, 99, 235, 0.3);
+      }
+    }
+    
+    /* Glowing Effect - Adapted for Light Theme */
+    .glow {
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow {
+      from { 
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.3),
+                   0 0 20px rgba(37, 99, 235, 0.2),
+                   0 0 30px rgba(37, 99, 235, 0.1);
+      }
+      to { 
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.5),
+                   0 0 30px rgba(37, 99, 235, 0.3),
+                   0 0 40px rgba(37, 99, 235, 0.2);
+      }
+    }
+    
+    /* Social Button Hover Effects - Light Theme */
+    .social-btn {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .social-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, 0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .social-btn:hover::before {
+      width: 100px;
+      height: 100px;
+    }
+    
+    .social-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Success/Error Animations */
+    .message-slide {
+      animation: slideInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    @keyframes slideInBounce {
+      0% { 
+        transform: translateY(-30px) scale(0.8); 
+        opacity: 0; 
+      }
+      50% { 
+        transform: translateY(5px) scale(1.05); 
+        opacity: 1; 
+      }
+      100% { 
+        transform: translateY(0) scale(1); 
+        opacity: 1; 
+      }
+    }
+    
+    /* Card Flip Animation */
+    .flip-card {
+      perspective: 1500px;
+      transform-style: preserve-3d;
+    }
+    
+    .flip-card-inner {
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    
+    .flip-card-front, .flip-card-back {
+      backface-visibility: hidden;
+      position: relative;
+    }
+    
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+
+<body class="parking-bg">
+<div class="flex items-center justify-center min-h-screen p-4 relative">
+
+<div class="w-full max-w-md flip-card" id="flipCard">
+  <div class="flip-card-inner">
+    
+    <!-- Login Card (Front) -->
+    <div class="flip-card-front">
+      <div class="glass-card rounded-3xl p-8">
+        
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mb-4 pulse glow">
+            <i class="fas fa-parking text-white text-3xl"></i>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+          <p class="text-gray-600">Sign in to your smart parking account</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+          <div class="input-group">
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              required
+              placeholder=" "
+              class="w-full px-4 py-3 bg-white/80 border border-gray-300 rounded-xl text-gray-800 placeholder-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            >
+            <label for="username" class="floating-label">Username or Email</label>
+            <i class="fas fa-user absolute right-4 top-4 text-gray-500"></i>
+          </div>
+
+          <div class="input-group">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              required
+              placeholder=" "
+              class="w-full px-4 py-3 bg-white/80 border border-gray-300 rounded-xl text-gray-800 placeholder-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            >
+            <label for="password" class="floating-label">Password</label>
+            <i class="fas fa-lock absolute right-4 top-4 text-gray-500"></i>
+          </div>
+
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-xl message-slide">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span id="errorText">Invalid password. Please try again.</span>
+          </div>
+
+          <!-- Success Message -->
+          <div id="successMessage" class="hidden bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-xl message-slide">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="successText">Login successful! Redirecting...</span>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 rounded-xl btn-animated hover:from-blue-600 hover:to-blue-700 transition duration-200 transform hover:scale-[1.02] flex items-center justify-center"
+          >
+            <span id="loginBtnText">Sign In</span>
+            <div class="spinner ml-2" id="loginSpinner"></div>
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <p class="text-gray-600">
+            Don't have an account? 
+            <button 
+              onclick="flipToSignUp()" 
+              class="text-blue-500 font-semibold hover:text-blue-600 transition"
+            >
+              Sign Up
+            </button>
+          </p>
+        </div>
+
+        <!-- Social Login Options -->
+        <div class="mt-6">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-3 gap-3">
+            <button class="social-btn flex justify-center items-center py-2 px-4 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition">
+              <i class="fab fa-google text-gray-700"></i>
+            </button>
+            <button class="social-btn flex justify-center items-center py-2 px-4 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition">
+              <i class="fab fa-facebook text-gray-700"></i>
+            </button>
+            <button class="social-btn flex justify-center items-center py-2 px-4 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition">
+              <i class="fab fa-github text-gray-700"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Demo Accounts Info -->
+        <div class="mt-6 p-3 bg-yellow-50 rounded-xl border border-yellow-200 glow">
+          <p class="text-xs text-gray-600 text-center">
+            <i class="fas fa-info-circle mr-1 text-yellow-600"></i>
+            Demo: Use any username with password "admin123"
+          </p>
+        </div>
+      </div>
+    </div>
+
+  <!-- Sign Up Card (Back) -->
+    <div class="flip-card-back">
+      <div class="glass-card rounded-3xl p-8">
+        
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-4 pulse glow">
+            <i class="fas fa-user-plus text-white text-3xl"></i>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
+          <p class="text-gray-600">Join our smart parking system</p>
+        </div>
+
+        <!-- Sign Up Form -->
+        <form id="signUpForm" class="space-y-6">
+          <div class="input-group">
+            <input 
+              type="text" 
+              id="newUsername" 
+              name="newUsername" 
+              required
+              placeholder=" "
+              class="w-full px-4 py-3 bg-white/80 border border-gray-300 rounded-xl text-gray-800 placeholder-transparent focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+            >
+            <label for="newUsername" class="floating-label">Username</label>
+            <i class="fas fa-user absolute right-4 top-4 text-gray-500"></i>
+          </div>
+
+          <div class="input-group">
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required
+              placeholder=" "
+              class="w-full px-4 py-3 bg-white/80 border border-gray-300 rounded-xl text-gray-800 placeholder-transparent focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+            >
+            <label for="email" class="floating-label">Email</label>
+            <i class="fas fa-envelope absolute right-4 top-4 text-gray-500"></i>
+          </div>
+
+          <div class="input-group">
+            <input 
+              type="password" 
+              id="newPassword" 
+              name="newPassword" 
+              required
+              minlength="6"
+              placeholder=" "
+              class="w-full px-4 py-3 bg-white/80 border border-gray-300 rounded-xl text-gray-800 placeholder-transparent focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+            >
+            <label for="newPassword" class="floating-label">Password (min 6 chars)</label>
+            <i class="fas fa-lock absolute right-4 top-4 text-gray-500"></i>
+          </div>
+
+          <div class="input-group">
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              name="confirmPassword" 
+              required
+              placeholder=" "
+              class="w-full px-4 py-3 bg-white/80 border border-gray-300 rounded-xl text-gray-800 placeholder-transparent focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+            >
+            <label for="confirmPassword" class="floating-label">Confirm Password</label>
+            <i class="fas fa-lock absolute right-4 top-4 text-gray-500"></i>
+          </div>
+
+          <!-- Sign Up Error Message -->
+          <div id="signUpError" class="hidden bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-xl message-slide">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span id="signUpErrorText">Passwords do not match. Please try again.</span>
+          </div>
+
+          <!-- Sign Up Success Message -->
+          <div id="signUpSuccess" class="hidden bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-xl message-slide">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="signUpSuccessText">Account created successfully! You can now sign in.</span>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold py-3 rounded-xl btn-animated hover:from-green-600 hover:to-green-700 transition duration-200 transform hover:scale-[1.02] flex items-center justify-center"
+          >
+            <span id="signUpBtnText">Create Account</span>
+            <div class="spinner ml-2" id="signUpSpinner"></div>
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <p class="text-gray-600">
+            Already have an account? 
+            <button 
+              onclick="flipToLogin()" 
+              class="text-green-500 font-semibold hover:text-green-600 transition"
+            >
+              Sign In
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initialize database (localStorage as simple DB)
+  function initDatabase() {
+    if (!localStorage.getItem('parkingUsers')) {
+      localStorage.setItem('parkingUsers', JSON.stringify({}));
+    }
+  }
+
+  // Get users from database
+  function getUsersFromDB() {
+    return JSON.parse(localStorage.getItem('parkingUsers') || '{}');
+  }
+
+  // Save user to database
+  function saveUserToDB(username, userData) {
+    const users = getUsersFromDB();
+    users[username] = userData;
+    localStorage.setItem('parkingUsers', JSON.stringify(users));
+  }
+
+  // Initialize database on load
+  initDatabase();
+
+  // Flip animations
+  function flipToSignUp() {
+    document.getElementById('flipCard').classList.add('flipped');
+  }
+
+  function flipToLogin() {
+    document.getElementById('flipCard').classList.remove('flipped');
+  }
+
+  // Show loading state
+  function showLoading(buttonId, spinnerId, textId) {
+    document.getElementById(buttonId).disabled = true;
+    document.getElementById(spinnerId).style.display = 'block';
+    document.getElementById(textId).textContent = 'Processing...';
+  }
+
+  // Hide loading state
+  function hideLoading(buttonId, spinnerId, textId, originalText) {
+    document.getElementById(buttonId).disabled = false;
+    document.getElementById(spinnerId).style.display = 'none';
+    document.getElementById(textId).textContent = originalText;
+  }
+
+  // Show message
+  function showMessage(messageId, textId, message, isError = false) {
+    const messageEl = document.getElementById(messageId);
+    const textEl = document.getElementById(textId);
+    
+    textEl.textContent = message;
+    messageEl.classList.remove('hidden');
+    
+    if (!isError) {
+      setTimeout(() => {
+        messageEl.classList.add('hidden');
+      }, 3000);
+    }
+  }
+
+  // Hide message
+  function hideMessage(messageId) {
+    document.getElementById(messageId).classList.add('hidden');
+  }
+
+  // Login form submission
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    // Hide previous messages
+    hideMessage('errorMessage');
+    hideMessage('successMessage');
+    
+    // Show loading
+    showLoading('loginForm', 'loginSpinner', 'loginBtnText');
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Get users from database
+    const users = getUsersFromDB();
+    
+    // Check if user exists in database
+    if (users[username]) {
+      if (users[username].password === password) {
+        // Valid login - store session and redirect
+        const sessionData = {
+          username: username,
+          email: users[username].email,
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('currentUser', JSON.stringify(sessionData));
+        
+        showMessage('successMessage', 'successText', `Welcome back, ${username}! Redirecting...`);
+        
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      } else {
+        // Invalid password
+        hideLoading('loginForm', 'loginSpinner', 'loginBtnText', 'Sign In');
+        showMessage('errorMessage', 'errorText', 'Invalid password. Please try again.', true);
+      }
+    } else {
+      // Check for demo login
+      if (password === 'admin123') {
+        // Create demo user session
+        const sessionData = {
+          username: username,
+          email: username + '@demo.com',
+          loginTime: new Date().toISOString(),
+          isDemo: true
+        };
+        localStorage.setItem('currentUser', JSON.stringify(sessionData));
+        
+        showMessage('successMessage', 'successText', `Demo login successful! Welcome, ${username}! Redirecting...`);
+        
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      } else {
+        hideLoading('loginForm', 'loginSpinner', 'loginBtnText', 'Sign In');
+        showMessage('errorMessage', 'errorText', 'User not found. Please sign up or use password "admin123" for demo.', true);
+      }
+    }
+  });
+
+  // Sign up form submission
+  document.getElementById('signUpForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('newUsername').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Hide previous messages
+    hideMessage('signUpError');
+    hideMessage('signUpSuccess');
+    
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      showMessage('signUpError', 'signUpErrorText', 'Passwords do not match. Please try again.', true);
+      return;
+    }
+    
+    // Show loading
+    showLoading('signUpForm', 'signUpSpinner', 'signUpBtnText');
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Check if username already exists
+    const users = getUsersFromDB();
+    if (users[username]) {
+      hideLoading('signUpForm', 'signUpSpinner', 'signUpBtnText', 'Create Account');
+      showMessage('signUpError', 'signUpErrorText', 'Username already exists. Please choose another.', true);
+      return;
+    }
+    
+    // Save new user to database
+    const userData = {
+      username: username,
+      email: email,
+      password: password,
+      createdAt: new Date().toISOString()
+    };
+    
+    saveUserToDB(username, userData);
+    
+    // Show success message
+    showMessage('signUpSuccess', 'signUpSuccessText', `Account created successfully! ${username}, you can now sign in.`);
+    
+    // Clear form
+    document.getElementById('signUpForm').reset();
+    
+    // Switch to login after 2 seconds
+    setTimeout(() => {
+      flipToLogin();
+      hideLoading('signUpForm', 'signUpSpinner', 'signUpBtnText', 'Create Account');
+    }, 2000);
+  });
+
+  // Check if user is already logged in
+  window.addEventListener('load', function() {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      // User is already logged in, redirect to dashboard
+      window.location.href = 'index.html';
+    }
+  });
+
+  // Add input animations
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.classList.add('focused');
+    });
+    
+    input.addEventListener('blur', function() {
+      if (!this.value) {
+        this.parentElement.classList.remove('focused');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
