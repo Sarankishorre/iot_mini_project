@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Dashboard = ({ user, onLogout }) => {
   // Enhanced pricing structure with hourly rates
@@ -144,14 +145,57 @@ const Dashboard = ({ user, onLogout }) => {
     setSelectedPayment(method);
   };
 
-  // Process payment (simulated)
+  // Process payment with Razorpay
   const processPayment = async (amount, method) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        showNotification(`Payment of ₹${amount} processed via ${method.toUpperCase()}!`, 'success');
-        resolve(true);
-      }, 1500);
-    });
+    try {
+      // Create order from backend
+      const { data: order } = await axios.post('http://localhost:5000/create-order', {
+        amount,
+        device_id: selectedSlot,
+      });
+
+      // Open Razorpay checkout
+      return new Promise((resolve) => {
+        const options = {
+          key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+          amount: order.amount,
+          currency: 'INR',
+          name: 'Smart Parking',
+          description: `Book ${selectedSlot} — ${bookingForm.duration} hours`,
+          order_id: order.id,
+          method: {
+            upi: method === 'upi',
+            card: method === 'card',
+            wallet: method === 'wallet',
+            netbanking: false,
+            cash: method === 'cash'
+          },
+          handler: function (response) {
+            showNotification(`✅ Payment successful! ID: ${response.razorpay_payment_id}`, 'success');
+            resolve(true);
+          },
+          prefill: { 
+            name: user.username, 
+            email: user.email || `${user.username}@example.com` 
+          },
+          theme: { color: '#3b82f6' },
+          modal: {
+            ondismiss: function() {
+              showNotification('Payment cancelled', 'error');
+              resolve(false);
+            }
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      });
+
+    } catch (error) {
+      showNotification('❌ Payment failed. Make sure backend server is running on port 5000.', 'error');
+      console.error(error);
+      return false;
+    }
   };
 
   // Handle booking submission
