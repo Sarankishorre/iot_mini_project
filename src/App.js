@@ -2,16 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import PaymentButton from './components/PaymentButton';
+
+// PaymentButton is NOT used in the IoT parking flow.
+// Payments are handled by Flask /pay page (for IoT gate payments)
+// and by Dashboard.js booking modal (for pre-bookings).
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading]     = useState(true);
 
   useEffect(() => {
     const userData = localStorage.getItem('currentUser');
     if (userData) {
-      setCurrentUser(JSON.parse(userData));
+      try {
+        setCurrentUser(JSON.parse(userData));
+      } catch {
+        localStorage.removeItem('currentUser');
+      }
     }
     setIsLoading(false);
   }, []);
@@ -41,55 +48,23 @@ function App() {
           <Route
             path="/login"
             element={
-              currentUser ?
-                <Navigate to="/dashboard" replace /> :
-                <Login onLogin={handleLogin} />
+              currentUser
+                ? <Navigate to="/dashboard" replace />
+                : <Login onLogin={handleLogin} />
             }
           />
           <Route
             path="/dashboard"
             element={
-              currentUser ?
-                <Dashboard
-                  user={currentUser}
-                  onLogout={handleLogout}
-                  // ✅ Payment button passed as prop to Dashboard
-                  paymentSection={
-                    <PaymentButton
-                      deviceId={currentUser?.deviceId || "SENSOR_001"}
-                      amount={99}
-                      planName="Basic Activation"
-                    />
-                  }
-                /> :
-                <Navigate to="/login" replace />
-            }
-          />
-          <Route
-            path="/payment"
-            element={
-              currentUser ?
-                <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-                  <div className="bg-white p-8 rounded-2xl shadow-lg text-center">
-                    <h2 className="text-2xl font-bold mb-2">Activate Your Device</h2>
-                    <p className="text-gray-500 mb-6">
-                      Device ID: <span className="font-mono text-green-600">
-                        {currentUser?.deviceId || "SENSOR_001"}
-                      </span>
-                    </p>
-                    <PaymentButton
-                      deviceId={currentUser?.deviceId || "SENSOR_001"}
-                      amount={99}
-                      planName="Basic Activation"
-                    />
-                  </div>
-                </div>
+              currentUser
+                ? <Dashboard user={currentUser} onLogout={handleLogout} />
                 : <Navigate to="/login" replace />
             }
           />
+          {/* Catch-all redirect */}
           <Route
-            path="/"
-            element={<Navigate to={currentUser ? "/dashboard" : "/login"} replace />}
+            path="*"
+            element={<Navigate to={currentUser ? '/dashboard' : '/login'} replace />}
           />
         </Routes>
       </div>
