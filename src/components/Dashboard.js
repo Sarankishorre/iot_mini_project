@@ -2,19 +2,27 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 // ── Flask server address ──────────────────────────────────────
-// Must match SERVER_IP:SERVER_PORT in smart_parking_integrated.py
-const API = process.env.REACT_APP_API_URL || 'http://10.56.217.148:5000';
+// CHANGE THIS to match your laptop's actual IP address.
+// Run `ipconfig` (Windows) or `ip addr` (Linux) to find it.
+// The React dev server and Flask must be on the same LAN.
+// HTTP port 5000 is used here (no HTTPS needed for dashboard).
+const API = process.env.REACT_APP_API_URL || 'https://10.143.49.148:5001';
 
 const Dashboard = ({ user, onLogout }) => {
 
   // ── State ────────────────────────────────────────────────────
-  const [slots, setSlots]           = useState({ occupied: [], available: [1,2,3,4] });
-  const [stats, setStats]           = useState({
-    total_slots: 4, occupied_count: 0, available_count: 4,
-    occupancy_pct: 0, total_revenue: 0, today_revenue: 0,
+  const [slots, setSlots]             = useState({ occupied: [], available: [1,2,3,4] });
+  const [stats, setStats]             = useState({
+    total_slots:     4,
+    occupied_count:  0,
+    available_count: 4,
+    occupancy_pct:   0,
+    total_revenue:   0,
+    today_revenue:   0,
     active_sessions: 0
   });
-  const [history, setHistory]       = useState([]);      // from /vehicles
+  const [history, setHistory]         = useState([]);
+  const [irStatus, setIrStatus]       = useState({ entry: false, exit: false });
   const [currentTime, setCurrentTime] = useState(new Date());
   const [notification, setNotification] = useState(null);
 
@@ -39,14 +47,12 @@ const Dashboard = ({ user, onLogout }) => {
   }, []);
 
   // ── Poll /slot_status every 3 s ──────────────────────────────
-  // Real-time slot status from Flask server
   const fetchSlots = useCallback(async () => {
     try {
       const { data } = await axios.get(`${API}/slot_status`);
       setSlots(data);
-      console.log('[SLOTS] Updated:', data);
     } catch (err) {
-      console.error('[SLOTS] Error:', err);
+      console.error('[SLOTS] Error:', err.message);
     }
   }, []);
 
@@ -57,12 +63,13 @@ const Dashboard = ({ user, onLogout }) => {
   }, [fetchSlots]);
 
   // ── Poll /dashboard_stats every 5 s ─────────────────────────
+  // Endpoint added to Flask: returns revenue, occupancy %, active sessions
   const fetchStats = useCallback(async () => {
     try {
       const { data } = await axios.get(`${API}/dashboard_stats`);
       setStats(data);
     } catch (e) {
-      console.warn('[stats poll]', e.message);
+      console.warn('[STATS] poll failed:', e.message);
     }
   }, []);
 
@@ -73,12 +80,13 @@ const Dashboard = ({ user, onLogout }) => {
   }, [fetchStats]);
 
   // ── Poll /vehicles every 5 s ─────────────────────────────────
+  // Endpoint added to Flask: returns last 50 vehicle records with unique `id`
   const fetchHistory = useCallback(async () => {
     try {
       const { data } = await axios.get(`${API}/vehicles`);
       setHistory(data);
     } catch (e) {
-      console.warn('[history poll]', e.message);
+      console.warn('[HISTORY] poll failed:', e.message);
     }
   }, []);
 
@@ -88,6 +96,23 @@ const Dashboard = ({ user, onLogout }) => {
     return () => clearInterval(t);
   }, [fetchHistory]);
 
+  // ── Poll /ir_status every 2 s — shows live entry/exit banner ─
+  // Lets the dashboard show "🚗 Vehicle entering..." in real time
+  const fetchIrStatus = useCallback(async () => {
+    try {
+      const { data } = await axios.get(`${API}/ir_status`);
+      setIrStatus(data);
+    } catch (e) {
+      // silently ignore — IR status is cosmetic for dashboard
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchIrStatus();
+    const t = setInterval(fetchIrStatus, 2000);
+    return () => clearInterval(t);
+  }, [fetchIrStatus]);
+
   // ── Derived: active / recent bookings ────────────────────────
   const activeBookings = history.filter(
     v => v.payment_status === 'pending' && !v.exit_time
@@ -96,33 +121,39 @@ const Dashboard = ({ user, onLogout }) => {
     .filter(v => v.payment_status === 'paid' || v.exit_time)
     .slice(0, 5);
 
-  // ── Time tracking for occupied slots ────────────────────────
+  // ── Time tracking for occupied slots ─────────────────────────
   const getSlotTime = (slotNum) => {
-    const vehicle = history.find(v => v.slot_number === slotNum && v.payment_status === 'pending' && !v.exit_time);
+    const vehicle = history.find(
+      v => v.slot_number === slotNum
+        && v.payment_status === 'pending'
+        && !v.exit_time
+    );
     if (!vehicle || !vehicle.entry_time) return null;
-    
+
     const entryTime = new Date(vehicle.entry_time);
-    const now = new Date();
-    const diffMs = now - entryTime;
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-    
+    const now       = new Date();
+    const diffMs    = now - entryTime;
+    const hours     = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes   = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds   = Math.floor((diffMs % (1000 * 60)) / 1000);
+
     return { hours, minutes, seconds, vehicle };
   };
 
-  // ── Slot display helpers ─────────────────────────────────────
+  // ── Slot display helpers ──────────────────────────────────────
   const slotStatus = (n) => slots.occupied.includes(n) ? 'occupied' : 'available';
 
   const slotColor = (n) => {
-    const s = slotStatus(n);
-    if (s === 'occupied') return 'bg-red-100 border-red-400 text-red-700 cursor-not-allowed';
+    if (slotStatus(n) === 'occupied')
+      return 'bg-red-100 border-red-400 text-red-700 cursor-not-allowed';
     return 'bg-green-100 border-green-400 text-green-700 cursor-pointer hover:bg-green-200 transition';
   };
 
-  // ── Open Flask payment page for vehicle ───────────────────────
+  // ── Open Flask payment page for a vehicle ────────────────────
   const openPaymentPage = (vehicleId) => {
-    const paymentUrl = `${API}/pay?vehicle_id=${vehicleId}`;
+    // Payment page is HTTPS on port 5001 (required for phone camera)
+    const httpsBase  = API.replace(':5000', ':5001').replace('http://', 'https://');
+    const paymentUrl = `${httpsBase}/pay?vehicle_id=${vehicleId}`;
     window.open(paymentUrl, '_blank');
   };
 
@@ -132,9 +163,9 @@ const Dashboard = ({ user, onLogout }) => {
       className="min-h-screen overflow-y-auto"
       style={{
         background: "linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.4)), url('/car-park-with-cars-background_1047188-62547.avif'), linear-gradient(135deg,#667eea 0%,#764ba2 100%)",
-        backgroundSize: 'cover,cover,cover',
-        backgroundPosition: 'center,center,center',
-        backgroundRepeat: 'no-repeat,no-repeat,no-repeat',
+        backgroundSize:       'cover,cover,cover',
+        backgroundPosition:   'center,center,center',
+        backgroundRepeat:     'no-repeat,no-repeat,no-repeat',
         backgroundAttachment: 'fixed,fixed,fixed'
       }}
     >
@@ -148,8 +179,20 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
         )}
 
+        {/* ── Live IR activity banner ── */}
+        {/* Shows a coloured strip at the top when ESP32 triggers entry or exit IR */}
+        {(irStatus.entry || irStatus.exit) && (
+          <div className={`fixed top-0 left-0 right-0 z-40 py-2 text-center text-white text-sm font-semibold shadow-lg
+            ${irStatus.entry ? 'bg-green-600' : 'bg-orange-500'}`}>
+            {irStatus.entry
+              ? '🚗 Vehicle detected at ENTRY gate — camera scanning...'
+              : '🚗 Vehicle detected at EXIT gate — camera scanning...'}
+          </div>
+        )}
+
         {/* ── Header ── */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 gap-4">
+        <div className={`flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 gap-4
+          ${(irStatus.entry || irStatus.exit) ? 'mt-8' : ''}`}>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg text-center md:text-left">
             Smart Parking Dashboard
           </h1>
@@ -221,10 +264,10 @@ const Dashboard = ({ user, onLogout }) => {
                 <span className="text-xs text-gray-400">Live · updates every 3 s</span>
               </div>
 
-              {/* 4 slots (1–4) from IoT system with real-time status */}
+              {/* 4 slots live from ESP32 + Flask */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
                 {[1, 2, 3, 4].map((n) => {
-                  const slotTime = getSlotTime(n);
+                  const slotTime   = getSlotTime(n);
                   const isOccupied = slotStatus(n) === 'occupied';
                   return (
                     <div
@@ -238,20 +281,22 @@ const Dashboard = ({ user, onLogout }) => {
                       <p className="text-xs md:text-sm opacity-80">
                         {isOccupied ? 'Occupied' : 'Available'}
                       </p>
-                      
-                      {/* Show time and vehicle info for occupied slots */}
+
+                      {/* Live timer + plate for occupied slots */}
                       {isOccupied && slotTime && (
                         <div className="mt-2 text-xs">
                           <p className="font-mono text-red-600">
-                            {String(slotTime.hours).padStart(2, '0')}:{String(slotTime.minutes).padStart(2, '0')}:{String(slotTime.seconds).padStart(2, '0')}
+                            {String(slotTime.hours).padStart(2, '0')}:
+                            {String(slotTime.minutes).padStart(2, '0')}:
+                            {String(slotTime.seconds).padStart(2, '0')}
                           </p>
                           <p className="text-gray-600 truncate">
                             {slotTime.vehicle.vehicle_id}
                           </p>
                         </div>
                       )}
-                      
-                      {/* Payment button for occupied slots */}
+
+                      {/* Pay button when fare is calculated */}
                       {isOccupied && slotTime && slotTime.vehicle.fare_amount && (
                         <button
                           onClick={() => openPaymentPage(slotTime.vehicle.vehicle_id)}
@@ -265,7 +310,7 @@ const Dashboard = ({ user, onLogout }) => {
                 })}
               </div>
 
-              {/* Quick stats bar — FIX #7: active_sessions now always defined from stats */}
+              {/* Quick stats bar */}
               <div className="grid grid-cols-3 gap-2 md:gap-4">
                 <div className="bg-green-100 p-3 md:p-6 rounded-xl text-center">
                   <p className="stats-number text-green-700 text-xl md:text-4xl">
@@ -280,7 +325,6 @@ const Dashboard = ({ user, onLogout }) => {
                   <p className="stats-label text-red-600 text-xs md:text-sm">Occupied</p>
                 </div>
                 <div className="bg-blue-100 p-3 md:p-6 rounded-xl text-center">
-                  {/* FIX #7: active_sessions is now always present in stats initial state */}
                   <p className="stats-number text-blue-700 text-xl md:text-4xl">
                     {stats.active_sessions}
                   </p>
@@ -293,7 +337,7 @@ const Dashboard = ({ user, onLogout }) => {
           {/* ── Right: Active + Recent ── */}
           <div className="lg:col-span-4">
 
-            {/* Active bookings (vehicles currently inside, payment pending) */}
+            {/* Active bookings (pending payment, no exit yet) */}
             <div className="glass-card rounded-2xl md:rounded-3xl p-4 md:p-6 mb-4 md:mb-6">
               <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4">
                 Active Sessions
@@ -306,8 +350,7 @@ const Dashboard = ({ user, onLogout }) => {
               ) : (
                 <div className="space-y-2">
                   {activeBookings.map((v) => (
-                    // FIX #2: use v.id (unique DB row id) as key instead of vehicle_id+created_at
-                    // which can collide for repeat visitors with the same plate
+                    // v.id is the ROW_NUMBER() from /vehicles — always unique
                     <div key={v.id} className="bg-green-50 border border-green-200 p-3 rounded-xl">
                       <div className="flex justify-between items-start mb-1">
                         <span className="font-bold text-green-700 text-sm tracking-widest">
@@ -318,19 +361,21 @@ const Dashboard = ({ user, onLogout }) => {
                         </span>
                       </div>
                       <p className="text-xs text-gray-500">
-                        Entry: {v.entry_time ? new Date(v.entry_time).toLocaleTimeString('en-IN') : '—'}
+                        Entry: {v.entry_time
+                          ? new Date(v.entry_time).toLocaleTimeString('en-IN')
+                          : '—'}
                       </p>
                       <p className="text-xs text-gray-500">
                         Duration: {v.entry_time ? (() => {
-                          const now = new Date();
-                          const entry = new Date(v.entry_time);
-                          const diff = Math.floor((now - entry) / 60000);
+                          const diff = Math.floor((new Date() - new Date(v.entry_time)) / 60000);
                           return `${diff} min`;
                         })() : '—'}
                       </p>
                       <div className="flex justify-between items-center mt-2">
                         <p className="text-xs text-orange-600 font-medium">
-                          {v.fare_amount ? `Fare: ₹${parseFloat(v.fare_amount).toFixed(0)}` : 'Calculating...'}
+                          {v.fare_amount
+                            ? `Fare: ₹${parseFloat(v.fare_amount).toFixed(0)}`
+                            : 'Calculating...'}
                         </p>
                         {v.fare_amount && (
                           <button
@@ -347,18 +392,18 @@ const Dashboard = ({ user, onLogout }) => {
               )}
             </div>
 
-            {/* Recent paid/completed sessions from /vehicles */}
+            {/* Recent completed (paid) sessions */}
             <div className="glass-card rounded-2xl md:rounded-3xl p-4 md:p-6">
               <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4">
                 Recent Bookings
               </h2>
               {recentBookings.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-4">No completed sessions yet</p>
+                <p className="text-sm text-gray-400 text-center py-4">
+                  No completed sessions yet
+                </p>
               ) : (
                 <div className="space-y-2 md:space-y-3">
                   {recentBookings.map((v) => (
-                    // FIX #2: use v.id as the unique key — v.id comes from the
-                    // SELECT id field added to /vehicles in the Flask fix
                     <div key={v.id} className="bg-gray-100 p-2 md:p-3 rounded-xl">
                       <div className="flex justify-between items-center">
                         <div>
@@ -374,7 +419,9 @@ const Dashboard = ({ user, onLogout }) => {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-green-600 text-sm md:text-base">
-                            {v.fare_amount ? `₹${parseFloat(v.fare_amount).toFixed(0)}` : '—'}
+                            {v.fare_amount
+                              ? `₹${parseFloat(v.fare_amount).toFixed(0)}`
+                              : '—'}
                           </p>
                           <p className="text-xs text-gray-500">
                             {v.payment_status === 'paid' ? '✅ paid' : '⏳ pending'}

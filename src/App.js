@@ -4,8 +4,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 
 // PaymentButton is NOT used in the IoT parking flow.
-// Payments are handled by Flask /pay page (for IoT gate payments)
-// and by Dashboard.js booking modal (for pre-bookings).
+// Payments are handled by Flask /pay page (opened via window.open from Dashboard).
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
