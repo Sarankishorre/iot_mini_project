@@ -6,7 +6,7 @@ import axios from 'axios';
 // Run `ipconfig` (Windows) or `ip addr` (Linux) to find it.
 // The React dev server and Flask must be on the same LAN.
 // HTTP port 5000 is used here (no HTTPS needed for dashboard).
-const API = process.env.REACT_APP_API_URL || 'https://10.143.49.148:5001';
+const API = process.env.REACT_APP_API_URL || 'http://10.143.49.148:5000';
 
 const Dashboard = ({ user, onLogout }) => {
 
